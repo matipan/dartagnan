@@ -1,30 +1,71 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
+	"image"
 
-	"github.corp.globant.com/InternetOfThings/face-tracking-turret/server"
+	"flag"
+
+	"github.corp.globant.com/InternetOfThings/face-tracking-turret/motion"
+	"gocv.io/x/gocv"
+)
+
+const (
+	minArea = 7000
+)
+
+var (
+	stream = flag.Bool("stream", true, "stream the images on a server")
+	port   = flag.String("port", ":8080", "port for the stream server")
+	area   = flag.Float64("area", minArea, "base area for motion detection")
+	device = flag.Int("device", 0, "device ID for the camera")
 )
 
 func main() {
-	// TODO: flags with specific platform to run
-
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.DebugLevel)
+	flag.Parse()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	s := &server.Server{}
+	s := motion.NewServer()
+	detector, err := motion.NewDetector(*device, *area, contourFunc, s)
+	if err != nil {
+		log.Fatalf("Could not initialize detector: %s", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go detector.Run(ctx)
+
+	quit := make(chan struct{})
 	go func() {
 		<-c
-		s.Close()
+		cancel()
+		close(quit)
 	}()
 
-	log.Fatal(s.Serve(":8080", "/", 0, "res10_300x300_ssd_iter_140000.caffemodel", "deploy.prototxt"))
+	if !*stream {
+		<-quit
+		log.Println("Leaving")
+		return
+	}
+
+	server := &http.Server{
+		Handler: s,
+		Addr:    *port,
+	}
+	go func() {
+		<-quit
+		server.Shutdown(ctx)
+	}()
+	log.Println(server.ListenAndServe())
+}
+
+func contourFunc(rect image.Rectangle, frame gocv.Mat) {
+	log.Printf("Got motion")
 }
