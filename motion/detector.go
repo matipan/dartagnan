@@ -52,6 +52,7 @@ func NewDetector(deviceID int, area float64, cf ContourFunc, streamer Streamer) 
 		return nil, errors.Wrap(err, "Could not read first video frame")
 	}
 	convertFrame(frame, &firstFrame)
+	gocv.Flip(firstFrame, &firstFrame, 1)
 
 	return &Detector{
 		video:      video,
@@ -86,7 +87,7 @@ func (d *Detector) forward() bool {
 	if !d.video.Read(&d.frame) {
 		return true
 	}
-
+	gocv.Flip(d.frame, &d.frame,1)
 	convertFrame(d.frame, &d.gray)
 
 	gocv.AbsDiff(d.firstFrame, d.gray, &d.delta)
