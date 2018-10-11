@@ -75,6 +75,7 @@ type window struct {
 }
 
 func (w *window) StreamFrame(img gocv.Mat) {
+	gocv.Resize(img, &img, image.Point{X: 800, Y: 600}, 0, 0, gocv.InterpolationLinear)
 	w.frame.IMShow(img)
 	w.frame.WaitKey(1)
 }
