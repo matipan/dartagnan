@@ -1,4 +1,4 @@
-package motion
+package detector
 
 import (
 	"context"
@@ -25,22 +25,25 @@ type Detector struct {
 	thresh     gocv.Mat
 	kernel     gocv.Mat
 
-	cf ContourFunc
+	handler HandleMotion
 
 	streamer Streamer
 
 	area float64
 }
 
+// Streamer allows stream the images that are processed.
 type Streamer interface {
 	StreamDelta(img gocv.Mat)
 	StreamFrame(img gocv.Mat)
 	StreamThresh(img gocv.Mat)
 }
 
-type ContourFunc func(rect image.Rectangle, frame gocv.Mat)
+// HandleMotion is the motion handler function.
+type HandleMotion func(rect image.Rectangle)
 
-func NewDetector(deviceID int, area float64, cf ContourFunc, streamer Streamer) (*Detector, error) {
+// New creates a new device with the specified ID.
+func New(deviceID int, area float64, handler HandleMotion, streamer Streamer) (*Detector, error) {
 	video, err := gocv.VideoCaptureDevice(deviceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not open capture device")
@@ -63,7 +66,7 @@ func NewDetector(deviceID int, area float64, cf ContourFunc, streamer Streamer) 
 		thresh:     gocv.NewMat(),
 		kernel:     gocv.NewMat(),
 		streamer:   streamer,
-		cf:         cf,
+		handler:    handler,
 		area:       area,
 	}, nil
 }
@@ -87,7 +90,7 @@ func (d *Detector) forward() bool {
 	if !d.video.Read(&d.frame) {
 		return true
 	}
-	gocv.Flip(d.frame, &d.frame,1)
+	gocv.Flip(d.frame, &d.frame, 1)
 	convertFrame(d.frame, &d.gray)
 
 	gocv.AbsDiff(d.firstFrame, d.gray, &d.delta)
@@ -98,7 +101,7 @@ func (d *Detector) forward() bool {
 		rect := gocv.BoundingRect(cnt)
 		gocv.Rectangle(&d.frame, rect, rectColor, 2)
 		gocv.PutText(&d.frame, "Motion detected", statusPoint, gocv.FontHersheyPlain, 1.2, textColor, 2)
-		d.cf(rect, d.frame)
+		d.handler(rect)
 	}
 
 	d.streamer.StreamFrame(d.frame)
@@ -108,6 +111,7 @@ func (d *Detector) forward() bool {
 	return false
 }
 
+// Close closes the detector.
 func (d *Detector) Close() error {
 	d.firstFrame.Close()
 	d.frame.Close()
@@ -122,7 +126,7 @@ func bestContour(frame gocv.Mat, minArea float64) []image.Point {
 	cnts := gocv.FindContours(frame, gocv.RetrievalExternal, gocv.ChainApproxSimple)
 	var (
 		bestCnt  []image.Point
-		bestArea float64 = minArea
+		bestArea = minArea
 	)
 	for _, cnt := range cnts {
 		if area := gocv.ContourArea(cnt); area > bestArea {

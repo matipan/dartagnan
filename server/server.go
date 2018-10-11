@@ -1,4 +1,4 @@
-package motion
+package server
 
 import (
 	"log"
@@ -8,6 +8,7 @@ import (
 	"gocv.io/x/gocv"
 )
 
+// Server is a streaming server.
 type Server struct {
 	*mux.Router
 	delta  *mjpeg.Stream
@@ -15,19 +16,23 @@ type Server struct {
 	thresh *mjpeg.Stream
 }
 
+// StreamDelta implements the detector.Streamer interface.
 func (s *Server) StreamDelta(img gocv.Mat) {
 	IMStream(s.delta, img)
 }
 
+// StreamThresh implements the detector.Streamer interface.
 func (s *Server) StreamThresh(img gocv.Mat) {
 	IMStream(s.thresh, img)
 }
 
+// StreamFrame implements the detector.Streamer interface.
 func (s *Server) StreamFrame(img gocv.Mat) {
 	IMStream(s.frame, img)
 }
 
-func NewServer() *Server {
+// New creates a new streaming server.
+func New() *Server {
 	fs := mjpeg.NewStream()
 	ds := mjpeg.NewStream()
 	ts := mjpeg.NewStream()
@@ -45,6 +50,7 @@ func NewServer() *Server {
 	}
 }
 
+// IMStream streams img to the stream.
 func IMStream(stream *mjpeg.Stream, img gocv.Mat) {
 	buf, err := gocv.IMEncode(".jpg", img)
 	if err != nil {
