@@ -31,7 +31,7 @@ const (
 	distance float64 = 1.35
 
 	minX = 70
-	minY = 10
+	minY = 13
 )
 
 var (
@@ -100,6 +100,12 @@ func main() {
 	frames := gocv.NewWindow("Frame")
 	deltas := gocv.NewWindow("Delta")
 	threshs := gocv.NewWindow("Threshs")
+	frames.ResizeWindow(800, 600)
+	deltas.ResizeWindow(400,400)
+	threshs.ResizeWindow(400,400)
+	frames.MoveWindow(0, 0)
+	deltas.MoveWindow(800, 0)
+	threshs.MoveWindow(800, 600)
 	w := &window{frame: frames, delta: deltas, thresh: threshs}
 	detector, err := motion.NewDetector(*device, *area, contourFunc, w)
 	if err != nil {
@@ -138,7 +144,7 @@ func main() {
 
 func contourFunc(rect image.Rectangle, img gocv.Mat) {
 	now := time.Now().Unix()*1000
-	if (now - lastRun) < 500 {
+	if (now - lastRun) < 10 {
 		return
 	}
 	midX = (float64((rect.Max.X-rect.Min.X))/2.0+float64(rect.Min.X))
