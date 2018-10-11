@@ -30,8 +30,8 @@ const (
 
 	distance float64 = 1.35
 
-	minX = 55
-	minY = 0
+	minX = 70
+	minY = 10
 )
 
 var (
@@ -118,11 +118,11 @@ func main() {
 	r := raspi.NewAdaptor()
 	r.PiBlasterPeriod = 20000000
 	r.Connect()
-	servoX, err = r.PWMPin("35")
+	servoX, err = r.PWMPin("33")
 	if err != nil {
 		log.Fatal(err)
 	}
-	servoY, err = r.PWMPin("33")
+	servoY, err = r.PWMPin("35")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,9 +148,9 @@ func contourFunc(rect image.Rectangle, img gocv.Mat) {
 	lastX = midX
 	lastY = midY
 	radsX := math.Atan((midX*distance)/500.0)
-	radsY := math.Atan((midY*distance)/500.0)
+	radsY := math.Atan(((500.0-midY)*distance)/500.0)
 	x := uint8(radsX*180/math.Pi)+minX
-	y := uint8(radsY*180/math.Pi)+minY
+	y := uint8(radsY*180/math.Pi)-minY
 
 	log.Printf("pixels(x,y)=(%v,%v) -- angles(x,y)=(%v,%v) -- rads(x,y)=(%.4f,%.4f)", int(midX), int(midY), x, y, radsX, radsY)
 	moveY(y)

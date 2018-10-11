@@ -91,7 +91,7 @@ func (d *Detector) forward() bool {
 	convertFrame(d.frame, &d.gray)
 
 	gocv.AbsDiff(d.firstFrame, d.gray, &d.delta)
-	gocv.Threshold(d.delta, &d.thresh, 25, 255, gocv.ThresholdBinary)
+	gocv.Threshold(d.delta, &d.thresh, 15, 150, gocv.ThresholdBinary)
 	gocv.Dilate(d.thresh, &d.thresh, d.kernel)
 	cnt := bestContour(d.thresh.Clone(), d.area)
 	if len(cnt) > 0 {
