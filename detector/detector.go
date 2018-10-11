@@ -1,4 +1,4 @@
-package motion
+package detector
 
 import (
 	"context"
@@ -15,6 +15,7 @@ var (
 	statusPoint = image.Pt(10, 20)
 )
 
+// Detector detects objects reading from a video device.
 type Detector struct {
 	video *gocv.VideoCapture
 
@@ -25,22 +26,29 @@ type Detector struct {
 	thresh     gocv.Mat
 	kernel     gocv.Mat
 
-	cf ContourFunc
+	handler HandleMotion
 
 	streamer Streamer
 
 	area float64
 }
 
+// Streamer holds stream methods for each type of image.
 type Streamer interface {
 	StreamDelta(img gocv.Mat)
 	StreamFrame(img gocv.Mat)
 	StreamThresh(img gocv.Mat)
 }
 
-type ContourFunc func(rect image.Rectangle, frame gocv.Mat)
+// HandleMotion is the function that gets called when motion
+// is detected.
+type HandleMotion func(rect image.Rectangle)
 
-func NewDetector(deviceID int, area float64, cf ContourFunc, streamer Streamer) (*Detector, error) {
+// New creates a new detector, it opens the device specified by `deviceID`.
+// The minimum size of the area in motion will be specified by `area`.
+// Each type of image will be streamed to the streamer.
+// `handler` will be called when motion is detected.
+func New(deviceID int, area float64, handler HandleMotion, streamer Streamer) (*Detector, error) {
 	video, err := gocv.VideoCaptureDevice(deviceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not open capture device")
@@ -63,13 +71,14 @@ func NewDetector(deviceID int, area float64, cf ContourFunc, streamer Streamer) 
 		thresh:     gocv.NewMat(),
 		kernel:     gocv.NewMat(),
 		streamer:   streamer,
-		cf:         cf,
+		handler:    handler,
 		area:       area,
 	}, nil
 }
 
+// Run runs the detector until the context is closed.
 func (d *Detector) Run(ctx context.Context) {
-	defer d.Close()
+	defer d.close()
 
 	for {
 		select {
@@ -87,7 +96,7 @@ func (d *Detector) forward() bool {
 	if !d.video.Read(&d.frame) {
 		return true
 	}
-	gocv.Flip(d.frame, &d.frame,1)
+	gocv.Flip(d.frame, &d.frame, 1)
 	convertFrame(d.frame, &d.gray)
 
 	gocv.AbsDiff(d.firstFrame, d.gray, &d.delta)
@@ -98,7 +107,7 @@ func (d *Detector) forward() bool {
 		rect := gocv.BoundingRect(cnt)
 		gocv.Rectangle(&d.frame, rect, rectColor, 2)
 		gocv.PutText(&d.frame, "Motion detected", statusPoint, gocv.FontHersheyPlain, 1.2, textColor, 2)
-		d.cf(rect, d.frame)
+		d.handler(rect)
 	}
 
 	d.streamer.StreamFrame(d.frame)
@@ -108,7 +117,8 @@ func (d *Detector) forward() bool {
 	return false
 }
 
-func (d *Detector) Close() error {
+// close closes the detector.
+func (d *Detector) close() error {
 	d.firstFrame.Close()
 	d.frame.Close()
 	d.gray.Close()
@@ -122,7 +132,7 @@ func bestContour(frame gocv.Mat, minArea float64) []image.Point {
 	cnts := gocv.FindContours(frame, gocv.RetrievalExternal, gocv.ChainApproxSimple)
 	var (
 		bestCnt  []image.Point
-		bestArea float64 = minArea
+		bestArea = minArea
 	)
 	for _, cnt := range cnts {
 		if area := gocv.ContourArea(cnt); area > bestArea {
