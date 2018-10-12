@@ -1,10 +1,10 @@
 [[constraint]]
-  branch = "master"
-  name = "github.com/hybridgroup/mjpeg"
-
-[[constraint]]
   name = "gocv.io/x/gocv"
   version = "0.16.0"
+
+[[constraint]]
+  name = "github.com/matipan/gobot"
+  branch = "master"
 
 [prune]
   go-tests = true

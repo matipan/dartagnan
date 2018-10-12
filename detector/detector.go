@@ -85,14 +85,19 @@ func (d *Detector) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			if d.forward() {
+			if d.scan() {
 				return
 			}
 		}
 	}
 }
 
-func (d *Detector) forward() bool {
+// scan scans the video for a new frame. It then parses this
+// frame applying a few filters, thresholds and dilations in
+// order to then calculate the contour of the area in movement.
+// Once it has the contour it will draw the bounding rectangle
+// and call the handle motion function.
+func (d *Detector) scan() bool {
 	if !d.video.Read(&d.frame) {
 		return true
 	}
@@ -128,6 +133,8 @@ func (d *Detector) close() error {
 	return d.video.Close()
 }
 
+// bestContour obtains the biggest contour in the frame(provided is bigger)
+// than the minArea.
 func bestContour(frame gocv.Mat, minArea float64) []image.Point {
 	cnts := gocv.FindContours(frame, gocv.RetrievalExternal, gocv.ChainApproxSimple)
 	var (

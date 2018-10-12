@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gobot.io/x/gobot/platforms/raspi"
-	"gobot.io/x/gobot/sysfs"
+	"github.com/matipan/gobot/platforms/raspi"
+	"github.com/matipan/gobot/sysfs"
 )
 
 const (
@@ -117,6 +117,8 @@ func rectMiddle(rect image.Rectangle) (x int, y int) {
 	return (rect.Max.X-rect.Min.X)/2 + rect.Min.X, (rect.Max.Y-rect.Min.Y)/2 + rect.Min.Y
 }
 
+// angleFromPixel calculates the angle of the given pixel
+// for the specific size and distance of the object.
 func angleFromPixel(pixel, size int, distance float64) uint8 {
 	return uint8((math.Atan((float64(pixel)*distance)/float64(size)) * 180 / math.Pi))
 }

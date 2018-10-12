@@ -2,28 +2,35 @@
 
 
 [[projects]]
-  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
-  name = "github.com/gorilla/context"
+  digest = "1:0ade334594e69404d80d9d323445d2297ff8161637f9b2d347cc6973d2d6f05b"
+  name = "github.com/hashicorp/errwrap"
   packages = ["."]
   pruneopts = "UT"
-  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
-  version = "v1.1.1"
-
-[[projects]]
-  digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
-  name = "github.com/gorilla/mux"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
-  version = "v1.6.2"
+  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:9956f4f58b2ccea25656086bcd7be0273915961a8231965a1a6c886874172054"
-  name = "github.com/hybridgroup/mjpeg"
+  digest = "1:f668349b83f7d779567c880550534addeca7ebadfdcf44b0b9c39be61864b4b7"
+  name = "github.com/hashicorp/go-multierror"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4680f319790ebffe28bbee775ecd1725693731ca"
+  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f4759470e6c42c01eb49ad89435c04303937d3012861c659988af329bdcb048b"
+  name = "github.com/matipan/gobot"
+  packages = [
+    ".",
+    "drivers/gpio",
+    "drivers/i2c",
+    "drivers/spi",
+    "platforms/raspi",
+    "sysfs",
+  ]
+  pruneopts = "UT"
+  revision = "00b46e2627a1d2e43c1376af2b3b94a6a6a324ef"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -34,6 +41,22 @@
   version = "v0.8.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fe592bd048ffa30b699fbccadade6bf60b747c7d4b888cc41fce3726af17b157"
+  name = "github.com/sigurn/crc8"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e55481d6f45c5a8f040343bace9013571dae103e"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9af7525086446bbd8be2f3f11fb3c056da67f216e1b12700616b6c6327ece095"
+  name = "github.com/sigurn/utils"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f19e41f79f8f006116f682c1af454591bc278ad4"
+
+[[projects]]
   digest = "1:52a94d0eb5420c4f6ec0ca108c1820884c2a66ae6027f90f2326db08ffe7b0bd"
   name = "gocv.io/x/gocv"
   packages = ["."]
@@ -41,12 +64,33 @@
   revision = "116580adca5ee7dbf8d1307c9072f5094051116f"
   version = "v0.16.0"
 
+[[projects]]
+  digest = "1:59be0af0d046acad3cdf72047e7bbef113d55d5cc7e6bbf912f183cda1e4eae6"
+  name = "periph.io/x/periph"
+  packages = [
+    ".",
+    "conn",
+    "conn/gpio",
+    "conn/gpio/gpioreg",
+    "conn/i2c",
+    "conn/i2c/i2creg",
+    "conn/physic",
+    "conn/pin",
+    "conn/spi",
+    "conn/spi/spireg",
+    "host/fs",
+    "host/sysfs",
+  ]
+  pruneopts = "UT"
+  revision = "f34a1b4e75c5935f6269723ae45eacd0aa1d1a2a"
+  version = "v3.1.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/gorilla/mux",
-    "github.com/hybridgroup/mjpeg",
+    "github.com/matipan/gobot/platforms/raspi",
+    "github.com/matipan/gobot/sysfs",
     "github.com/pkg/errors",
     "gocv.io/x/gocv",
   ]

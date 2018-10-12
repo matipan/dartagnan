@@ -9,9 +9,9 @@ import (
 
 	"flag"
 
-	"github.corp.globant.com/InternetOfThings/face-tracking-turret/detector"
-	"github.corp.globant.com/InternetOfThings/face-tracking-turret/turret"
-	"github.corp.globant.com/InternetOfThings/face-tracking-turret/window"
+	"github.com/matipan/tracking-turret/detector"
+	"github.com/matipan/tracking-turret/turret"
+	"github.com/matipan/tracking-turret/window"
 )
 
 const minArea = 7000
