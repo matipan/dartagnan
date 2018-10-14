@@ -27,7 +27,7 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	t, err := turret.New("33", "35", 1.3, 500, 10)
+	t, err := turret.New("33", "35", 1.3, 500, 0)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)

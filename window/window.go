@@ -44,12 +44,12 @@ func (m *Manager) StreamFrame(img gocv.Mat) {
 
 // StreamDelta implements the streamer interface.
 func (m *Manager) StreamDelta(img gocv.Mat) {
-	imShow(m.deltas, m.img)
+	imShow(m.deltas, img)
 }
 
 // StreamThresh implements the streamer interface.
 func (m *Manager) StreamThresh(img gocv.Mat) {
-	imShow(m.thresholds, m.img)
+	imShow(m.thresholds, img)
 }
 
 func imShow(w *gocv.Window, img gocv.Mat) {

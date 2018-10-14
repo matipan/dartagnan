@@ -19,7 +19,7 @@ const (
 
 	distance float64 = 1.35
 
-	minX = 70
+	minX = 40
 	minY = 13
 )
 
@@ -50,6 +50,7 @@ type Turret struct {
 // damage to the servos.
 func New(pinX, pinY string, distance float64, imgSize int, sleepTime uint64) (*Turret, error) {
 	r := raspi.NewAdaptor()
+	r.PiBlasterPeriod = 20000000
 	sx, err := r.PWMPin(pinX)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Could not init pin %s", pinX)
@@ -75,7 +76,8 @@ func calcDutyCycle(base uint8) uint32 {
 	if base > 180 {
 		base = 180
 	}
-	dc := uint32((float32(base)/180)*(dcMax-dcMin)) + dcMin
+	dc := uint32((float32(base)/180.0)*(dcMax-dcMin)) + dcMin
+	log.Printf("Duty cycle: %v", dc)
 	return dc
 }
 
@@ -96,17 +98,23 @@ func (t *Turret) MoveY(angle uint8) {
 // both servos to the correct position.
 func (t *Turret) HandleMotion(rect image.Rectangle) {
 	now := uint64(time.Now().Unix() * 1000)
-	if (now - lastRun) < t.sleepTime {
-		return
-	}
+	//if (now - lastRun) <= t.sleepTime {
+	//	return
+	//}
 	midX, midY = rectMiddle(rect)
 	if lastX == midX && lastY == midY {
 		return
 	}
 	lastRun = now
 	lastX, lastY = midX, midY
-	x := angleFromPixel(midX, t.imgSize, t.distance) + minX
-	y := angleFromPixel(t.imgSize-midY, t.imgSize, t.distance) - minY
+	x := angleFromPixel(midX, t.imgSize, t.distance)
+	if (x + minX) < 180 {
+		x = x + minX
+	}
+	y := angleFromPixel(t.imgSize-midY, t.imgSize, t.distance)
+	if y >= minY {
+		y = y - minY
+	}
 	log.Printf("pixels(x,y)=(%v,%v) -- angles(x,y)=(%v,%v)", midX, midY, x, y)
 	t.MoveY(y)
 	t.MoveX(x)
@@ -120,5 +128,5 @@ func rectMiddle(rect image.Rectangle) (x int, y int) {
 // angleFromPixel calculates the angle of the given pixel
 // for the specific size and distance of the object.
 func angleFromPixel(pixel, size int, distance float64) uint8 {
-	return uint8((math.Atan((float64(pixel)*distance)/float64(size)) * 180 / math.Pi))
+	return uint8((math.Atan((float64(pixel)*distance)/float64(size))) * 180 / math.Pi)
 }
